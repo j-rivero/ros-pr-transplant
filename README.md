@@ -4,11 +4,12 @@ Script to automatically clone a pull request targeted to an specific ROS release
 ## Usage
 
 * Install hub https://hub.github.com/
-* Edit the transplan_pr script to set ALL_BRANCHES properly if you are not using ${ROS_RELEASE}-devel schema
-* transplant_pr --help
+* Edit the transplan_pr script to set ALL_BRANCHES properly if you are not using `${ROS_RELEASE}-devel` schema for your branches
+* transplant_pr.bash --help
 
 ## Example
 
-`transplant_pr https://github.com/ros-simulation/gazebo_ros_pkgs/pull/500 kinetic-devel`
-
+```bash
+transplant_pr.bash https://github.com/ros-simulation/gazebo_ros_pkgs/pull/500 kinetic-devel
+```
 Result: https://github.com/ros-simulation/gazebo_ros_pkgs/pull/501
