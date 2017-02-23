@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
 
 ALL_BRANCHES="indigo-devel jade-devel kinetic-devel"
 
-set -e
+#set -e
 
 if [[ $# -lt 1 ]]; then
     echo "Usage: transplant <pr_url> [<destination_branch>]"
@@ -68,6 +68,7 @@ for branch in $DEST_BRANCHES; do
     ret=$(hub am --3way ${PR}) || true
     if [[ $ret != 0  ]]; then
 	cat <<- EOF
+
 	    -- The merge needs manual attention --"
 	
 	    After fixing it you can run:
@@ -77,10 +78,9 @@ for branch in $DEST_BRANCHES; do
 	EOF
 	popd > /dev/null
 	cd ${FORK_DIR}
-	exit 1
+    else
+      # If the merge is succesful go ahead with the branch and PR
+      git push origin ${_transplant_branch}
+      hub pull-request --browse -F commit.md -b ${branch} -h ${_transplant_branch}
     fi
-
-    # If the merge is succesful go ahead with the branch and PR
-    #git push origin ${_transplant_branch}
-    #hub pull-request --browse -F commit.md -b ${branch} -h ${_transplant_branch}
 done
