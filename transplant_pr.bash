@@ -43,7 +43,7 @@ fi
 
 FORK_DIR=$(mktemp -d)
 git clone git@github.com:${REPO} ${FORK_DIR}
-pushd ${FORK_DIR} 2> /dev/null
+pushd ${FORK_DIR} > /dev/null
 
 for branch in $DEST_BRANCHES; do
     echo "-------------------------------------------------"
@@ -54,11 +54,6 @@ for branch in $DEST_BRANCHES; do
     _transplant_branch="${branch}-transplant-${PR_NUMBER}"
     git checkout ${branch}
     git checkout -b ${_transplant_branch}
-    # --reject will help when patch don't apply cleanly. It will force to try with the
-    # usual offset and leave the repo at least partially patched. Be sure of use am --continue
-    # when finish
-    hub am --3way ${PR}
-    git push origin ${_transplant_branch}
     # keep tabs
     cat > commit.md <<- DELIM
 	${PR_TITLE} (${branch})
@@ -67,5 +62,25 @@ for branch in $DEST_BRANCHES; do
 	${PR_BODY}
 
 	DELIM
-    hub pull-request --browse -F commit.md -b ${branch} -h ${_transplant_branch}
+    # --reject will help when patch don't apply cleanly. It will force to try with the
+    # usual offset and leave the repo at least partially patched. Be sure of use am --continue
+    # when finish
+    ret=$(hub am --3way ${PR}) || true
+    if [[ $ret != 0  ]]; then
+	cat <<- EOF
+	    -- The merge needs manual attention --"
+	
+	    After fixing it you can run:
+	     1. git push origin ${_transplant_branch}
+	     2. hub pull-request --browse -F commit.md -b ${branch} -h ${_transplant_branch}
+
+	EOF
+	popd > /dev/null
+	cd ${FORK_DIR}
+	exit 1
+    fi
+
+    # If the merge is succesful go ahead with the branch and PR
+    #git push origin ${_transplant_branch}
+    #hub pull-request --browse -F commit.md -b ${branch} -h ${_transplant_branch}
 done
