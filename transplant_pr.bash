@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash +x
 
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -18,8 +18,6 @@
 # under the License.
 
 ALL_BRANCHES="indigo-devel jade-devel kinetic-devel"
-
-#set -e
 
 if [[ $# -lt 1 ]]; then
     echo "Usage: transplant <pr_url> [<destination_branch>]"
@@ -65,7 +63,8 @@ for branch in $DEST_BRANCHES; do
     # --reject will help when patch don't apply cleanly. It will force to try with the
     # usual offset and leave the repo at least partially patched. Be sure of use am --continue
     # when finish
-    ret=$(hub am --3way ${PR}) || true
+    hub am --3way ${PR} || true
+    ret=$?
     if [[ $ret != 0  ]]; then
 	cat <<- EOF
 
